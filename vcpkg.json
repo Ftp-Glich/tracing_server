@@ -2,6 +2,7 @@
   "dependencies": [
     "restinio",
     "nlohmann-json",
+    "mongo-cxx-driver",
     "fmt"
   ]
 }

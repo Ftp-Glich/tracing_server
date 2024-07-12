@@ -2,6 +2,7 @@
 #include <fstream>
 #include <restinio/core.hpp>
 #include <nlohmann/json.hpp>
+#include <mongocxx/database.hpp>
 
 template < typename RESP >
 RESP
