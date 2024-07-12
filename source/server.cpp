@@ -47,7 +47,7 @@ auto create_request_handler()
 			json jbody = json::parse(req->body());
 			init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "text/html; charset=utf-8" )
-						.set_body(std::to_string(jbody["password"].get<int>())))
+						.set_body(std::to_string(jbody["password"].get<int>()))
 						.done();
 				return restinio::request_accepted();
 		}
