@@ -2,6 +2,8 @@
 #include <fstream>
 #include <restinio/core.hpp>
 #include <nlohmann/json.hpp>
+#include <mongocxx/instance.hpp>
+#include "databaseAPI.hpp"
 
 
 template < typename RESP >
@@ -76,7 +78,10 @@ auto create_request_handler()
 int main()
 {
 	using namespace std::chrono;
+	database::DatabaseClient DbClient;
 
+	DbClient.AddDataToDb("Egor",
+		"123456");
 	try
 	{
 		using traits_t =
