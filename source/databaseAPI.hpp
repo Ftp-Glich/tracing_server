@@ -29,7 +29,6 @@ class DatabaseClient
     {
         mongocxx::collection collection = db["LoginData"];
         auto builder = bsoncxx::builder::stream::document{};
-
         bsoncxx::document::value doc_to_add =
             builder << "login" << login  
              << "password" << password
