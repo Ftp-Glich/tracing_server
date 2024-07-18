@@ -1,14 +1,6 @@
-add_subdirectory(json)
-add_subdirectory(database)
-add_subdirectory(server)
-
-
 add_executable(TraceProject Main.cpp)
 
-target_include_directories(TraceProject 
-    PUBLIC "${PROJECT_SOURCE_DIR}/source/include"
-)
-
+include_directories("${PROJECT_SOURCE_DIR}/source/include")
 
 target_link_libraries(TraceProject PUBLIC pthread fmt::fmt-header-only
  restinio::restinio 
@@ -20,3 +12,11 @@ target_link_libraries(TraceProject PUBLIC pthread fmt::fmt-header-only
  server
  )
  
+find_path(DEPS_INCLUDE_DIR include REQUIRED)
+include_directories(${DEPS_INCLUDE_DIR}/include ${DEPS_INCLUDE_DIR}/include/bsoncxx/v_noabi ${DEPS_INCLUDE_DIR}/include/mongocxx/v_noabi)
+  
+
+add_subdirectory(json)
+add_subdirectory(database)
+add_subdirectory(server)
+  

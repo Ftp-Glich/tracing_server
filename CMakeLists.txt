@@ -3,6 +3,8 @@ project (TraceProject)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_VERBOSE_MAKEFILE off)
+set(CMAKE_FIND_DEBUG_MODE off)
 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(restinio REQUIRED)
