@@ -2,30 +2,10 @@
  
 using namespace server;
 
-Server::Server(int port, const std::string& adress):
-_port(port), _adress(adress)
-{
-	Start();
-}
 
-void Server::Start()
-{
-    try
-	{	
-		restinio::run(
-			restinio::on_this_thread<traits_t>()
-				.port( _port )
-				.address( _adress )
-				.request_handler( create_request_handler() ) );
-	}
-	catch( const std::exception & ex )
-	{
-		std::cerr << "Error: " << ex.what() << std::endl;
-	}
-}
 
 template < typename RESP >
-RESP Server::init_resp( RESP resp )
+static RESP init_resp( RESP resp )
 {
 	resp.append_header( restinio::http_field::server, "RESTinio sample server /v.0.2" );
 	resp.append_header_date_field();
@@ -33,13 +13,12 @@ RESP Server::init_resp( RESP resp )
 	return resp;
 }
 
-
-auto Server::create_request_handler()
+static auto create_request_handler()
 {
 	auto router = std::make_unique< router_t >();
 	router->http_get(
 		"/",
-		[this]( auto req, auto ){
+		[]( auto req, auto ){
 				init_resp( req->create_response() )
 					.append_header( restinio::http_field::content_type, "text/plain; charset=utf-8" )
 					.set_body( "Hello world!")
@@ -50,7 +29,7 @@ auto Server::create_request_handler()
 
 	router->http_get(
 		"/json",
-		[this]( auto req, auto ){
+		[]( auto req, auto ){
 				init_resp( req->create_response() )
 					.append_header( restinio::http_field::content_type, "application/json" )
 					.set_body( R"-({"message" : "Hello world!"})-")
@@ -60,7 +39,7 @@ auto Server::create_request_handler()
 		} );
 	router->http_get(
 		"/html",
-		[this]( auto req, auto ){
+		[]( auto req, auto ){
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "text/html; charset=utf-8" )
 						.set_body(
@@ -74,14 +53,30 @@ auto Server::create_request_handler()
 
 				return restinio::request_accepted();
 		} );
-
-	return router;
+		return router;
 }
 
-int main()
+
+Server::Server(int port, const std::string& adress):
+_port(port), _adress(adress)
 {
-	
-	
-
-	return 0;
+	Start();
 }
+
+void Server::Start()
+{
+    try
+	{
+		restinio::run(
+			restinio::on_this_thread<traits_t>()
+				.port( _port )
+				.address( _adress )
+				.request_handler( create_request_handler() ) );
+	}
+	catch( const std::exception & ex )
+	{
+		std::cerr << "Error: " << ex.what() << std::endl;
+	}
+}
+
+

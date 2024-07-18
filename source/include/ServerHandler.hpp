@@ -19,8 +19,6 @@ public:
 	~Server() = default;
 private:
 	void Start();
-	template < typename RESP > RESP init_resp( RESP resp );
-	auto create_request_handler();
 	int _port;
 	std::string _adress;
 };
