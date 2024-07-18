@@ -7,7 +7,6 @@
 
 int main()
 {
-	database::DatabaseClient DbClient;
-	DbClient.AddDataToDb("Egor",
-		"123456");
+	server::Server server(8080, "localhost");
+	
 }

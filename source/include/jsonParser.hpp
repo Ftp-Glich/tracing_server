@@ -9,10 +9,19 @@ class Parser
 {
 public:
     Parser() = delete;
-    Parser(const std::string &json) noexcept;
+    Parser(const std::string &json)
+    {
+        _jbody = json::parse(json);
+    }
     ~Parser() = default;
-    std::string getLogin();
-    std::string getPassword();
+    std::string getLogin()
+    {
+        return _jbody["login"].get<std::string>();
+    }
+    std::string getPassword()
+    {
+        return _jbody["password"].get<std::string>();
+    }
 private:
     json _jbody;
 };
