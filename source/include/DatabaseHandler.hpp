@@ -40,9 +40,22 @@ class DatabaseClient
     {
         return true;
     }
+    int find(const std::string& login, const std::string& password)
+    {
+        mongocxx::collection collection = db["LoginData"];
+        bsoncxx::builder::stream::document filter_builder;
+        filter_builder << "login" << login
+                       << "password" << password; 
+        return collection.count_documents(filter_builder.view());
+    }
+    bool CheckData(const std::string& login, const std::string& password)
+    {
+        if(find(login, password) != 0) return true;
+        return false;
+    } 
  private:
     mongocxx::uri uri;
     mongocxx::client client;
-    mongocxx::database db;
+    mongocxx::database db; 
 };
 }

@@ -15,12 +15,15 @@ namespace server{
 class Server
 {
 public:
-	Server(int, const std::string&);
+	Server(int, const std::string&, database::DatabaseClient*, j_parser::Parser*);
 	~Server() = default;
 private:
+	std::unique_ptr<router_t> create_request_handler();
 	void Start();
 	int _port;
 	std::string _adress;
+	database::DatabaseClient* _dbClient;
+	j_parser::Parser* _jParser;
 };
 }
 

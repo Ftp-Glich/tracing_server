@@ -8,12 +8,12 @@ namespace j_parser
 class Parser
 {
 public:
-    Parser() = delete;
-    Parser(const std::string &json)
-    {
-        _jbody = json::parse(json);
-    }
+    Parser() = default;
     ~Parser() = default;
+    void Parse(const std::string& jstring)
+    {
+        _jbody = json::parse(jstring);
+    }
     std::string getLogin()
     {
         return _jbody["login"].get<std::string>();

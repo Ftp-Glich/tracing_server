@@ -13,12 +13,13 @@ static RESP init_resp( RESP resp )
 	return resp;
 }
 
-static auto create_request_handler()
+std::unique_ptr<router_t> Server::create_request_handler()
 {
 	auto router = std::make_unique< router_t >();
+	/*as an example
 	router->http_get(
 		"/",
-		[]( auto req, auto ){
+		[this]( auto req, auto ){
 				init_resp( req->create_response() )
 					.append_header( restinio::http_field::content_type, "text/plain; charset=utf-8" )
 					.set_body( "Hello world!")
@@ -29,7 +30,7 @@ static auto create_request_handler()
 
 	router->http_get(
 		"/json",
-		[]( auto req, auto ){
+		[this]( auto req, auto ){
 				init_resp( req->create_response() )
 					.append_header( restinio::http_field::content_type, "application/json" )
 					.set_body( R"-({"message" : "Hello world!"})-")
@@ -39,7 +40,7 @@ static auto create_request_handler()
 		} );
 	router->http_get(
 		"/html",
-		[]( auto req, auto ){
+		[this]( auto req, auto ){
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "text/html; charset=utf-8" )
 						.set_body(
@@ -53,12 +54,34 @@ static auto create_request_handler()
 
 				return restinio::request_accepted();
 		} );
+		*/
+		router->http_post(
+		"/login",
+		[this]( auto req, auto ){
+			_jParser->Parse(req->body());
+			int res = _dbClient->find(_jParser->getLogin(), _jParser->getPassword());
+			if(res > 0){
+				init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body(R"-({"message" : "You've entered"})-")	
+						.done();
+				return restinio::request_accepted();
+			}
+			else
+			{
+				init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body(std::to_string(res))	
+						.done();
+			return restinio::request_rejected();
+			}
+		});
 		return router;
 }
 
 
-Server::Server(int port, const std::string& adress):
-_port(port), _adress(adress)
+Server::Server(int port, const std::string& adress, database::DatabaseClient* dbClient, j_parser::Parser* jParser):
+_port(port), _adress(adress), _dbClient(dbClient), _jParser(jParser)
 {
 	Start();
 }
