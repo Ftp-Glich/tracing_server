@@ -56,11 +56,10 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		} );
 		*/
 		router->http_post(
-		"/login",
+		"/login/sign_in",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
-			int res = _dbClient->find(_jParser->getLogin(), _jParser->getPassword());
-			if(res > 0){
+			if(_dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword())){
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(R"-({"message" : "You've entered"})-")	
@@ -71,7 +70,20 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			{
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(std::to_string(res))	
+						.set_body("you're not registered")	
+						.done();
+			return restinio::request_rejected();
+			}
+		});
+		router->http_post(
+		"/login/registration",
+		[this]( auto req, auto ){
+			_jParser->Parse(req->body());
+			_dbClient->AddDataToDb(_jParser->getLogin(), _jParser->getPassword());
+			{
+				init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body("you've been registered")	
 						.done();
 			return restinio::request_rejected();
 			}
