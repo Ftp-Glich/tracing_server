@@ -4,6 +4,7 @@
     "nlohmann-json",
     "mongo-cxx-driver",
     "libbson",
-    "fmt"
+    "fmt",
+    "libxcrypt"
   ]
 }

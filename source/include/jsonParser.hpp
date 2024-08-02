@@ -22,6 +22,11 @@ public:
     {
         return _jbody["password"].get<std::string>();
     }
+    std::string getSalt()
+    {
+        return _jbody["salt"].get<std::string>();
+    }
+    
 private:
     json _jbody;
 };

@@ -16,45 +16,6 @@ static RESP init_resp( RESP resp )
 std::unique_ptr<router_t> Server::create_request_handler()
 {
 	auto router = std::make_unique< router_t >();
-	/*as an example
-	router->http_get(
-		"/",
-		[this]( auto req, auto ){
-				init_resp( req->create_response() )
-					.append_header( restinio::http_field::content_type, "text/plain; charset=utf-8" )
-					.set_body( "Hello world!")
-					.done();
-
-				return restinio::request_accepted();
-		} );
-
-	router->http_get(
-		"/json",
-		[this]( auto req, auto ){
-				init_resp( req->create_response() )
-					.append_header( restinio::http_field::content_type, "application/json" )
-					.set_body( R"-({"message" : "Hello world!"})-")
-					.done();
-
-				return restinio::request_accepted();
-		} );
-	router->http_get(
-		"/html",
-		[this]( auto req, auto ){
-				init_resp( req->create_response() )
-						.append_header( restinio::http_field::content_type, "text/html; charset=utf-8" )
-						.set_body(
-							"<html>\r\n"
-							"  <head><title>Hello from RESTinio!</title></head>\r\n"
-							"  <body>\r\n"
-							"    <center><h1>Hello world</h1></center>\r\n"
-							"  </body>\r\n"
-							"</html>\r\n" )
-						.done();
-
-				return restinio::request_accepted();
-		} );
-		*/
 		router->http_post(
 		"/login/sign_in",
 		[this]( auto req, auto ){
