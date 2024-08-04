@@ -9,8 +9,8 @@
 #include "mongocxx/client.hpp"
 #include "mongocxx/database.hpp"
 #include "mongocxx/uri.hpp"
-#include "crypt.h"
 #include "jsonParser.hpp"
+#include "bcrypt.h"
 
 namespace database
 {
@@ -32,12 +32,10 @@ class DatabaseClient
     {
         mongocxx::collection collection = db["LoginData"];
         auto builder = bsoncxx::builder::stream::document{};
-        const char* salt = "xy"; 
-        std::string hashed_password = crypt(password.c_str(), salt);
+        std::string hashed_password = bcrypt::generateHash(password);
         bsoncxx::document::value doc_to_add =
             builder << "login" << login  
              << "password" << hashed_password
-             << "salt" << salt
              << bsoncxx::builder::stream::finalize;
         collection.insert_one(doc_to_add.view());
         return true;
@@ -54,13 +52,13 @@ class DatabaseClient
         auto coursor = collection.find(filter_builder.view());
         for(auto doc: coursor)
         {			
-            _jParser->Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
-            if(strcmp((_jParser->getPassword()).c_str(), crypt(login.c_str(), (_jParser->getSalt()).c_str()))) return true;
+            _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
+            if(bcrypt::validatePassword(password, _jParser.getPassword())) return true;
         }
         return false;
     }
  private:
- 	j_parser::Parser* _jParser = jParser();
+ 	j_parser::Parser _jParser = j_parser::Parser();
     mongocxx::uri uri;
     mongocxx::client client;
     mongocxx::database db; 
