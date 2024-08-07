@@ -20,6 +20,8 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		"/login/sign_in",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
+			jvalidator::LoginValidator validator;
+			if(!validator.Validate(_jParser->getBody())) return restinio::request_rejected();
 			if(_dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword())){
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )

@@ -26,6 +26,10 @@ public:
     {
         return _jbody["salt"].get<std::string>();
     }
+    json getBody()
+    {
+        return _jbody;
+    }
     
 private:
     json _jbody;
