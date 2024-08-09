@@ -9,5 +9,13 @@
                 "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake"
             }
         }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "__addPreset__"
+        }
     ]
 }

@@ -7,12 +7,11 @@ using valijson::Schema;
 using valijson::SchemaParser;
 using valijson::Validator;
 using valijson::adapters::NlohmannJsonAdapter;
+#define registerShema "/home/egor/project/source/include/schemas/register_request_shema.json"
+#define loginShema "/home/egor/project/source/include/schemas/login_request_schema.json"
 
 namespace jvalidator
 {
-constexpr char registerShema[] = "/home/egor/project/source/include/schemas/register_request_shema.json";
-constexpr char loginShema[] = "/home/egor/project/source/include/schemas/login_request_schema.json";
-
 class JValidator
 {
 public:

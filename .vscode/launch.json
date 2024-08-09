@@ -2,6 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "LaunchTestProject",
+            "program": "${workspaceFolder}/build/source/TraceProject",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+
+        {
             "name": "CMake: CMake Script",
             "type": "cmake",
             "request": "launch",

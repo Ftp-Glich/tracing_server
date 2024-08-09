@@ -16,7 +16,7 @@ public:
     }
     std::string getLogin()
     {
-        return _jbody["login"].get<std::string>();
+        return _jbody["email"].get<std::string>();
     }
     std::string getPassword()
     {

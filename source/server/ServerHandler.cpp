@@ -1,5 +1,4 @@
 #include "ServerHandler.hpp"
- 
 using namespace server;
 
 
@@ -20,9 +19,16 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		"/login/sign_in",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
-			jvalidator::LoginValidator validator;
-			if(!validator.Validate(_jParser->getBody())) return restinio::request_rejected();
-			if(_dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword())){
+			jvalidator::LoginValidator lval;
+			if(!lval.Validate(_jParser->getBody()))
+			{
+				init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body("wrong schema")	
+						.done();
+				return restinio::request_rejected();
+			}
+			else if(_dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword())){
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(R"-({"message" : "You've entered"})-")	
@@ -43,14 +49,23 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
 			_dbClient->AddDataToDb(_jParser->getLogin(), _jParser->getPassword());
-			{
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body("you've been registered")	
 						.done();
 			return restinio::request_rejected();
-			}
 		});
+		router->http_post(
+		"/login/test",
+		[this]( auto req, auto ){
+			_jParser->Parse(req->body());			
+				init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body(_jParser->getLogin())	
+						.done();
+			return restinio::request_rejected();
+		});
+		
 		return router;
 }
 
