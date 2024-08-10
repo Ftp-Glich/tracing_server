@@ -1,7 +1,24 @@
 {
-    "username": "string",      
-    "email": "string",         
-    "password": "string",      
-    "confirmPassword": "string" 
-  }
-  
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "confirmPassword": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "username",
+    "email",
+    "password",
+    "confirmPassword"
+  ]
+}

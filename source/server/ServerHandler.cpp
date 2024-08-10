@@ -22,7 +22,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			jvalidator::LoginValidator lval;
 			if(!lval.Validate(_jParser->getBody()))
 			{
-				init_resp( req->create_response() )
+				init_resp( req->create_response(restinio::status_bad_request()) )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body("wrong schema")	
 						.done();
@@ -37,7 +37,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			}
 			else
 			{
-				init_resp( req->create_response() )
+				init_resp( req->create_response(restinio::status_bad_request()) )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body("you're not registered")	
 						.done();
@@ -49,6 +49,15 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
 			_dbClient->AddDataToDb(_jParser->getLogin(), _jParser->getPassword());
+			jvalidator::RegisterValidator rval;
+			if(!rval.Validate(_jParser->getBody()))
+			{
+				init_resp( req->create_response(restinio::status_bad_request()) )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body("wrong schema")	
+						.done();
+				return restinio::request_rejected();
+			}
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body("you've been registered")	
