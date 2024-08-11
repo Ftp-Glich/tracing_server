@@ -5,6 +5,7 @@
     "mongo-cxx-driver",
     "libbson",
     "fmt",
-    "valijson"
+    "valijson",
+    "jwt-cpp"
   ]
 }

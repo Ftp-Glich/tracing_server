@@ -1,6 +1,7 @@
 #include "ServerHandler.hpp"
-using namespace server;
 
+using namespace server;
+using namespace std::chrono;
 
 
 template < typename RESP >
@@ -58,11 +59,22 @@ std::unique_ptr<router_t> Server::create_request_handler()
 						.done();
 				return restinio::request_rejected();
 			}
+			else
+			{
+				using namespace std::chrono;
+    			auto current_time = duration_cast<seconds>(system_clock::now().time_since_epoch());
+    			auto expiration_time = current_time + seconds{864000}; // ten days
+    			auto token = jwt::create()
+    				.set_type("JWS")
+    				.set_issuer("auth0")
+    				.set_payload_claim("sample", jwt::claim(std::string("test")))
+    				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body("you've been registered")	
+						.set_body(token)	
 						.done();
-			return restinio::request_rejected();
+				return restinio::request_rejected();
+			}
 		});
 		router->http_post(
 		"/login/test",
