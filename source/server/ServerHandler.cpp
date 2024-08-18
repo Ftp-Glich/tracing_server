@@ -13,6 +13,13 @@ static RESP init_resp( RESP resp )
 	return resp;
 }
 
+std::string generateUUID() {
+    boost::uuids::random_generator generator;
+    boost::uuids::uuid id = generator();
+    return boost::uuids::to_string(id);
+}
+
+
 std::unique_ptr<router_t> Server::create_request_handler()
 {
 	auto router = std::make_unique< router_t >();
@@ -67,7 +74,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
     			auto token = jwt::create()
     				.set_type("JWS")
     				.set_issuer("auth0")
-    				.set_payload_claim("sample", jwt::claim(std::string("test")))
+    				.set_payload_claim("id", jwt::claim(generateUUID()))
     				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )

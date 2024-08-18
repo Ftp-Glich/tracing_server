@@ -10,7 +10,8 @@ target_link_libraries(
  $<IF:$<TARGET_EXISTS:mongo::mongocxx_static>,mongo::mongocxx_static,mongo::mongocxx_static>
  valijson
  server
- bcrypt 
+ bcrypt
+ Boost::uuid
 )
  
 find_path(DEPS_INCLUDE_DIR include REQUIRED)

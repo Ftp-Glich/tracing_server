@@ -6,6 +6,7 @@
     "libbson",
     "fmt",
     "valijson",
-    "jwt-cpp"
+    "jwt-cpp",
+    "boost-uuid"
   ]
 }
