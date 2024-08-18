@@ -108,11 +108,28 @@ void Server::Start()
 {
     try
 	{
+		namespace asio_ns = restinio::asio_ns;
+
+		asio_ns::ssl::context tls_context{ asio_ns::ssl::context::sslv23 };
+		tls_context.set_options(
+			asio_ns::ssl::context::default_workarounds
+			| asio_ns::ssl::context::no_sslv2
+			| asio_ns::ssl::context::single_dh_use );
+
+		tls_context.use_certificate_chain_file("certificate.pem" );
+		tls_context.use_private_key_file(
+			"private_key.pem",
+			asio_ns::ssl::context::pem );
+		tls_context.use_tmp_dh_file( "dhparams.pem" );
+
 		restinio::run(
-			restinio::on_this_thread<traits_t>()
-				.port( _port )
-				.address( _adress )
-				.request_handler( create_request_handler() ) );
+			restinio::on_this_thread< traits_t >()
+				.address( "localhost" )
+				.request_handler( create_request_handler() )
+				.read_next_http_message_timelimit( 10s )
+				.write_http_response_timelimit( 1s )
+				.handle_request_timeout( 1s )
+				.tls_context( std::move( tls_context ) ) );
 	}
 	catch( const std::exception & ex )
 	{
