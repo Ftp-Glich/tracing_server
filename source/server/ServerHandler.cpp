@@ -13,11 +13,6 @@ static RESP init_resp( RESP resp )
 	return resp;
 }
 
-std::string generateUUID() {
-    boost::uuids::random_generator generator;
-    boost::uuids::uuid id = generator();
-    return boost::uuids::to_string(id);
-}
 
 
 std::unique_ptr<router_t> Server::create_request_handler()
@@ -36,10 +31,21 @@ std::unique_ptr<router_t> Server::create_request_handler()
 						.done();
 				return restinio::request_rejected();
 			}
-			else if(_dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword())){
+			std::string id = _dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword());
+			if(id != "wrong"){
+				using namespace std::chrono;
+    			auto current_time = duration_cast<seconds>(system_clock::now().time_since_epoch());
+    			auto expiration_time = current_time + seconds{864000}; // ten days
+				std::string message = "User signed in successfully";
+    			auto token = jwt::create()
+    				.set_type("JWS")
+    				.set_issuer("auth0")
+    				.set_payload_claim("id", jwt::claim(id))
+					.set_payload_claim("message", jwt::claim(message))
+    				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(R"-({"message" : "You've entered"})-")	
+						.set_body(token)	
 						.done();
 				return restinio::request_accepted();
 			}
@@ -56,7 +62,6 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		"/login/registration",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
-			_dbClient->AddDataToDb(_jParser->getLogin(), _jParser->getPassword());
 			jvalidator::RegisterValidator rval;
 			if(!rval.Validate(_jParser->getBody()))
 			{
@@ -68,32 +73,24 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			}
 			else
 			{
+				std::string id = _dbClient->AddDataToDb(_jParser->getLogin(), _jParser->getPassword(), _jParser->getConf());
+				std::string message = "User registered successfully";
 				using namespace std::chrono;
     			auto current_time = duration_cast<seconds>(system_clock::now().time_since_epoch());
     			auto expiration_time = current_time + seconds{864000}; // ten days
     			auto token = jwt::create()
     				.set_type("JWS")
     				.set_issuer("auth0")
-    				.set_payload_claim("id", jwt::claim(generateUUID()))
+    				.set_payload_claim("id", jwt::claim(id))
+    				.set_payload_claim("message", jwt::claim(message))
     				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(token)	
 						.done();
-				return restinio::request_rejected();
+				return restinio::request_accepted();
 			}
 		});
-		router->http_post(
-		"/login/test",
-		[this]( auto req, auto ){
-			_jParser->Parse(req->body());			
-				init_resp( req->create_response() )
-						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(_jParser->getLogin())	
-						.done();
-			return restinio::request_rejected();
-		});
-		
 		return router;
 }
 

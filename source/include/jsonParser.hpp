@@ -22,9 +22,13 @@ public:
     {
         return _jbody["password"].get<std::string>();
     }
-    std::string getSalt()
+    std::string getId()
     {
-        return _jbody["salt"].get<std::string>();
+        return  _jbody["id"].get<std::string>();
+    }
+    std::string getConf()
+    {
+        return  _jbody["confirmPassword"].get<std::string>();
     }
     json getBody()
     {

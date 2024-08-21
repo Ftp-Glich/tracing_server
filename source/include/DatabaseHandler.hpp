@@ -11,6 +11,9 @@
 #include "mongocxx/uri.hpp"
 #include "jsonParser.hpp"
 #include "bcrypt.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 namespace database
 {
@@ -27,24 +30,29 @@ class DatabaseClient
       client(mongocxx::client(uri)),
       db(client[kDatabaseName]) {}
     
-    bool AddDataToDb(const std::string &login,
-                          const std::string &password)
+    std::string AddDataToDb(const std::string &login,
+                            const std::string &password,
+                            const std::string &conf_password)
     {
+        if(password != conf_password) return "conf error";
         mongocxx::collection collection = db["LoginData"];
         auto builder = bsoncxx::builder::stream::document{};
         std::string hashed_password = bcrypt::generateHash(password);
+        std::string id = generateUUID();
         bsoncxx::document::value doc_to_add =
-            builder << "login" << login  
+            builder 
+             << "login" << login  
              << "password" << hashed_password
+             << "id" << id
              << bsoncxx::builder::stream::finalize;
         collection.insert_one(doc_to_add.view());
-        return true;
+        return id;
     }
     bool RemoveDataFromDb(const std::string &character_id)
     {
         return true;
     }
-    bool CheckData(const std::string& login, const std::string& password)
+    std::string CheckData(const std::string& login, const std::string& password)
     {
         mongocxx::collection collection = db["LoginData"];
         bsoncxx::builder::stream::document filter_builder;
@@ -53,14 +61,19 @@ class DatabaseClient
         for(auto doc: coursor)
         {			
             _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
-            if(bcrypt::validatePassword(password, _jParser.getPassword())) return true;
+            if(bcrypt::validatePassword(password, _jParser.getPassword())) return _jParser.getId();
         }
-        return false;
+        return "wrong";
     }
  private:
  	j_parser::Parser _jParser = j_parser::Parser();
     mongocxx::uri uri;
     mongocxx::client client;
     mongocxx::database db; 
+    std::string generateUUID() {
+        boost::uuids::random_generator generator;
+        boost::uuids::uuid id = generator();
+        return boost::uuids::to_string(id);
+    }
 };
 }
