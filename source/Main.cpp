@@ -95,8 +95,8 @@ int generate_dh()
 
 int main()
 {
-    generate_key_and_cert();
-	generate_dh();
+    // generate_key_and_cert();
+	// generate_dh();
 	database::DatabaseClient* dbClient = new database::DatabaseClient;
 	j_parser::Parser* Parser = new j_parser::Parser;
 	server::Server server(8080, "localhost", dbClient, Parser);
