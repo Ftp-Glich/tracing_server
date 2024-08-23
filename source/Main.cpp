@@ -3,7 +3,6 @@
 
 #include "include/ServerHandler.hpp"
 
-
 int main()
 {
 	database::DatabaseClient* dbClient = new database::DatabaseClient;

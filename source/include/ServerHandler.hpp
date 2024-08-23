@@ -1,4 +1,5 @@
-#include "restinio/core.hpp"
+#include <restinio/core.hpp>
+#include <restinio/tls.hpp>
 #include "DatabaseHandler.hpp"
 #include "jsonValidator.hpp"
 #include <jwt-cpp/jwt.h>
@@ -10,11 +11,10 @@
 using router_t = restinio::router::express_router_t<>;
 using namespace std::chrono;
 using traits_t =
-			restinio::traits_t<
+ restinio::single_thread_tls_traits_t<
 				restinio::asio_timer_manager_t,
 				restinio::single_threaded_ostream_logger_t,
 				router_t >;
-
 
 namespace server{
 class Server
