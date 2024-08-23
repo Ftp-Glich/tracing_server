@@ -113,15 +113,12 @@ void Server::Start()
 		asio_ns::ssl::context tls_context{ asio_ns::ssl::context::sslv23 };
 		tls_context.set_options(
 			asio_ns::ssl::context::default_workarounds
-			| asio_ns::ssl::context::no_sslv2
-			| asio_ns::ssl::context::single_dh_use );
+			| asio_ns::ssl::context::no_sslv2);
 
-		tls_context.use_certificate_chain_file("certificate.pem" );
+		tls_context.use_certificate_chain_file("certs/myCA.pem" );
 		tls_context.use_private_key_file(
-			"private_key.pem",
+		"certs/myCA.key",
 			asio_ns::ssl::context::pem );
-		tls_context.use_tmp_dh_file( "dhparams.pem" );
-
 		restinio::run(
 			restinio::on_this_thread< traits_t >()
 				.address( "localhost" )
