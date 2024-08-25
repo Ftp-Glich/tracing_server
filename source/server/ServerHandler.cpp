@@ -41,11 +41,12 @@ std::unique_ptr<router_t> Server::create_request_handler()
     				.set_type("JWS")
     				.set_issuer("auth0")
     				.set_payload_claim("id", jwt::claim(id))
-					.set_payload_claim("message", jwt::claim(message))
     				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(token)	
+						.set_body(R"-({ "message" : "seccessful signing in!",
+										"token": )-" + token +
+										"}")	
 						.done();
 				return restinio::request_accepted();
 			}
@@ -82,11 +83,12 @@ std::unique_ptr<router_t> Server::create_request_handler()
     				.set_type("JWS")
     				.set_issuer("auth0")
     				.set_payload_claim("id", jwt::claim(id))
-    				.set_payload_claim("message", jwt::claim(message))
     				.sign(jwt::algorithm::hs256{"secret"});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(token)	
+						.set_body(R"-({ "message" : "seccessful registration!",
+										"token": )-" + token +
+										"}")	
 						.done();
 				return restinio::request_accepted();
 			}
