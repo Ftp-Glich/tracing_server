@@ -14,6 +14,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <jwt-cpp/jwt.h>
+
 
 namespace database
 {
@@ -62,6 +64,25 @@ class DatabaseClient
         {			
             _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
             if(bcrypt::validatePassword(password, _jParser.getPassword())) return _jParser.getId();
+        }
+        return "wrong";
+    }
+    std::string check_auth(jwt::decoded_jwt<jwt::traits::kazuho_picojson> token)
+    {
+        mongocxx::collection collection = db["LoginData"];
+        bsoncxx::builder::stream::document filter_builder;
+        std::string id;
+        for(auto& e : token.get_payload_json())
+        {
+            if(e.first != "id") continue;
+            id = e.second.to_str();
+        }
+        filter_builder << "id" << id; 
+        auto coursor = collection.find(filter_builder.view());
+        for(auto doc: coursor)
+        {			
+            _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
+            return _jParser.getBody().dump();
         }
         return "wrong";
     }

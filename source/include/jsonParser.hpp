@@ -34,6 +34,10 @@ public:
     {
         return _jbody;
     }
+    void setBody(json body)
+    {
+        _jbody = body;
+    }
     
 private:
     json _jbody;

@@ -15,11 +15,12 @@ static RESP init_resp( RESP resp )
 
 
 
+
 std::unique_ptr<router_t> Server::create_request_handler()
 {
 	auto router = std::make_unique< router_t >();
 		router->http_post(
-		"/login/sign_in",
+		"/auth/login",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
 			jvalidator::LoginValidator lval;
@@ -60,7 +61,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			}
 		});
 		router->http_post(
-		"/login/registration",
+		"/auth/registration",
 		[this]( auto req, auto ){
 			_jParser->Parse(req->body());
 			jvalidator::RegisterValidator rval;
@@ -93,6 +94,27 @@ std::unique_ptr<router_t> Server::create_request_handler()
 				return restinio::request_accepted();
 			}
 		});
+		router->http_get(
+		"/auth/me",
+		[this]( auto req, auto ){
+			std::string auth_field = req->header().get_field("Authorization");
+			std::string token = auth_field.erase(0, std::string("Bearer ").length());
+			std::string info = _dbClient->check_auth(jwt::decode(token));
+			if(info == "wrong")
+			{
+				init_resp( req->create_response(restinio::status_bad_request()) )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body("wrong token")	
+						.done();
+				return restinio::request_rejected();
+			}
+			init_resp( req->create_response() )
+						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
+						.set_body(info)	
+						.done();
+			return restinio::request_accepted();
+		}	
+		);
 		return router;
 }
 
