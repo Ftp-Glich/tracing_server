@@ -82,7 +82,7 @@ class DatabaseClient
         for(auto doc: coursor)
         {			
             _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
-            return _jParser.getBody().dump();
+            return _jParser.getId();
         }
         return "wrong";
     }

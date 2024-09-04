@@ -28,6 +28,7 @@ private:
 	std::string _adress;
 	database::DatabaseClient* _dbClient;
 	j_parser::Parser* _jParser;
+	std::unordered_map<std::string, j_parser::Parser> sessions;
 };
 }
 

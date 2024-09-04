@@ -43,6 +43,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
     				.set_issuer("auth0")
     				.set_payload_claim("id", jwt::claim(id))
     				.sign(jwt::algorithm::hs256{"secret"});
+				sessions.insert({id, *_jParser});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(R"-({ "message" : "seccessful signing in!",
@@ -99,8 +100,8 @@ std::unique_ptr<router_t> Server::create_request_handler()
 		[this]( auto req, auto ){
 			std::string auth_field = req->header().get_field("Authorization");
 			std::string token = auth_field.erase(0, std::string("Bearer ").length());
-			std::string info = _dbClient->check_auth(jwt::decode(token));
-			if(info == "wrong")
+			std::string id = _dbClient->check_auth(jwt::decode(token));
+			if(id == "wrong")
 			{
 				init_resp( req->create_response(restinio::status_bad_request()) )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
@@ -110,7 +111,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
 			}
 			init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
-						.set_body(info)	
+						.set_body(sessions[id].getBody().dump())	
 						.done();
 			return restinio::request_accepted();
 		}	
@@ -120,7 +121,7 @@ std::unique_ptr<router_t> Server::create_request_handler()
 
 
 Server::Server(int port, const std::string& adress, database::DatabaseClient* dbClient, j_parser::Parser* jParser):
-_port(port), _adress(adress), _dbClient(dbClient), _jParser(jParser)
+_port(port), _adress(adress), _dbClient(dbClient), _jParser(jParser), sessions()
 {
 	Start();
 }
