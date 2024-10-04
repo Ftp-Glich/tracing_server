@@ -34,6 +34,12 @@ public:
     {
         return _jbody;
     }
+    void addItem(std::string key, std::string value)
+    {
+        std::string item = "{\"" + key + "\": {\"" + value + "\"}";
+        json adition = json::parse(item);
+        _jbody.update(item);
+    }
     void setBody(json body)
     {
         _jbody = body;

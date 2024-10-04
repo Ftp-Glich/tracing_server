@@ -32,8 +32,8 @@ std::unique_ptr<router_t> Server::create_request_handler()
 						.done();
 				return restinio::request_rejected();
 			}
-			std::string id = _dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword());
-			if(id != "wrong"){
+			j_parser::Parser* data = _dbClient->CheckData(_jParser->getLogin(), _jParser->getPassword());
+			if(data != NULL ){
 				using namespace std::chrono;
     			auto current_time = duration_cast<seconds>(system_clock::now().time_since_epoch());
     			auto expiration_time = current_time + seconds{864000}; // ten days
@@ -41,15 +41,16 @@ std::unique_ptr<router_t> Server::create_request_handler()
     			auto token = jwt::create()
     				.set_type("JWS")
     				.set_issuer("auth0")
-    				.set_payload_claim("id", jwt::claim(id))
+    				.set_payload_claim("id", jwt::claim(data->getId()))
     				.sign(jwt::algorithm::hs256{"secret"});
-				sessions.insert({id, *_jParser});
+				sessions.insert({data->getId(), *data});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(R"-({ "message" : "seccessful signing in!",
 										"token": )-" + token +
 										"}")	
 						.done();
+				delete(data);
 				return restinio::request_accepted();
 			}
 			else
@@ -86,6 +87,8 @@ std::unique_ptr<router_t> Server::create_request_handler()
     				.set_issuer("auth0")
     				.set_payload_claim("id", jwt::claim(id))
     				.sign(jwt::algorithm::hs256{"secret"});
+				_jParser->addItem()
+				sessions.insert({id, *_jParser});
 				init_resp( req->create_response() )
 						.append_header( restinio::http_field::content_type, "application.json; charset=utf-8" )
 						.set_body(R"-({ "message" : "seccessful registration!",

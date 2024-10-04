@@ -54,18 +54,19 @@ class DatabaseClient
     {
         return true;
     }
-    std::string CheckData(const std::string& login, const std::string& password)
+    j_parser::Parser* CheckData(const std::string& login, const std::string& password)
     {
         mongocxx::collection collection = db["LoginData"];
         bsoncxx::builder::stream::document filter_builder;
         filter_builder << "login" << login; 
         auto coursor = collection.find(filter_builder.view());
+        j_parser::Parser* res = new j_parser::Parser;
         for(auto doc: coursor)
         {			
-            _jParser.Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
-            if(bcrypt::validatePassword(password, _jParser.getPassword())) return _jParser.getId();
+            res->Parse(bsoncxx::to_json(doc, bsoncxx::ExtendedJsonMode::k_relaxed));
+            if(bcrypt::validatePassword(password, res->getPassword())) return res;
         }
-        return "wrong";
+        return NULL;
     }
     std::string check_auth(jwt::decoded_jwt<jwt::traits::kazuho_picojson> token)
     {
